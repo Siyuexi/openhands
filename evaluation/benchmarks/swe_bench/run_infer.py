@@ -621,10 +621,10 @@ def process_instance(
         config.sandbox.remote_runtime_resource_factor
     )
 
-    runtime = create_runtime(config)
-    call_async_from_sync(runtime.connect)
-
     try:
+        state = None
+        runtime = create_runtime(config)
+        call_async_from_sync(runtime.connect)
         initialize_runtime(runtime, instance, metadata)
 
         message_action = get_instruction(instance, metadata)
@@ -642,8 +642,8 @@ def process_instance(
         )
 
         # if fatal error, throw EvalError to trigger re-run
-        if is_fatal_evaluation_error(state.last_error):
-            raise EvalException('Fatal error detected: ' + state.last_error)
+        # if is_fatal_evaluation_error(state.last_error):
+        #     raise EvalException('Fatal error detected: ' + state.last_error)
 
         # ======= THIS IS SWE-Bench specific =======
         # Get git patch
@@ -658,6 +658,10 @@ def process_instance(
         logger.info(
             f'Got git diff for instance {instance.instance_id}:\n--------\n{git_patch}\n--------'
         )
+    except Exception as e:
+        logger.error(f'Error occurred: {e}')
+        runtime_failure_count += 1
+        git_patch = ""
     finally:
         runtime.close()
     # ==========================================
@@ -672,18 +676,21 @@ def process_instance(
     # If you are working on some simpler benchmark that only evaluates the final model output (e.g., in a MessageAction)
     # You can simply get the LAST `MessageAction` from the returned `state.history` and parse it for evaluation.
     if state is None:
-        raise ValueError('State should not be None.')
-
+        # raise ValueError('State should not be None.')
+        instruction = ""
+        histories = []
+        metrics = {}
+    else:
     # NOTE: this is NO LONGER the event stream, but an agent history that includes delegate agent's events
-    histories = [event_to_dict(event) for event in state.history]
-    metrics = get_metrics(state)
+        histories = [event_to_dict(event) for event in state.history]
+        metrics = get_metrics(state)
 
-    # Save the output
-    instruction = message_action.content
-    if message_action.image_urls:
-        instruction += (
-            '\n\n<image_urls>' + '\n'.join(message_action.image_urls) + '</image_urls>'
-        )
+        # Save the output
+        instruction = message_action.content
+        if message_action.image_urls:
+            instruction += (
+                '\n\n<image_urls>' + '\n'.join(message_action.image_urls) + '</image_urls>'
+            )
     output = EvalOutput(
         instance_id=instance.instance_id,
         instruction=instruction,

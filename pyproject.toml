@@ -87,6 +87,7 @@ anthropic = { extras = [ "vertex" ], version = "*" }
 boto3 = "*"
 kubernetes = "^33.1.0"
 pyyaml = "^6.0.2"
+datasets = "^3.6.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -134,7 +135,6 @@ evaluate = "*"
 swebench = "^3.0.8"
 visualswebench = { git = "https://github.com/luolin101/Visual-SWE-bench.git" }
 swegym = { git = "https://github.com/SWE-Gym/SWE-Bench-Package.git" }
-commit0 = "*"
 func_timeout = "*"
 sympy = "*"
 gdown = "*"

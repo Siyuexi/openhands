@@ -193,6 +193,10 @@ class DockerRuntimeBuilder(RuntimeBuilder):
                 )
 
         except subprocess.CalledProcessError as e:
+            logger.error('CMD:')
+            for cmd in buildx_cmd:
+                logger.error(cmd)
+
             logger.error(f'Image build failed:\n{e}')  # TODO: {e} is empty
             logger.error(f'Command output:\n{e.output}')
             if self.rolling_logger.is_enabled():

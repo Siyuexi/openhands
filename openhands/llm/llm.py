@@ -578,10 +578,11 @@ class LLM(RetryMixin, DebugMixin):
 
         Logs the cost and usage stats of the completion call.
         """
-        try:
-            cur_cost = self._completion_cost(response)
-        except Exception:
-            cur_cost = 0
+        # try:
+        #     cur_cost = self._completion_cost(response)
+        # except Exception:
+        #     cur_cost = 0
+        cur_cost = 0
 
         stats = ''
         if self.cost_metric_supported:
